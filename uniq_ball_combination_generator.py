@@ -18,7 +18,7 @@ def save_csv(file_name, data_list, isFirst=False):
         if os.path.isfile(file_name):
             os.remove(file_name)
 
-    with open(f'output.csv', "a", newline='', encoding='utf-8-sig') as fp:
+    with open(f'{file_name}.csv', "a", newline='', encoding='utf-8-sig') as fp:
         wr = csv.writer(fp, dialect='excel')
         wr.writerow(data_list)
 
@@ -106,7 +106,7 @@ def main():
         sys.exit()
     main_url = "https://www.lottery.net/powerball/numbers/"
     file_name = "uniq_ball_data.csv"
-    start_year = 2020
+    start_year = 1992
     end_year = 2022
     print("-------------------------------------------------")
     print(f"            Scraping Started                    ")
