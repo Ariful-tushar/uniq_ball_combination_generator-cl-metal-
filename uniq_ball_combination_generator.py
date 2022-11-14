@@ -135,7 +135,7 @@ def main():
         sys.exit()
     main_url = "https://www.lottery.net/powerball/numbers/"
     file_name = "uniq_ball_data.csv"
-    start_year = 2020
+    start_year = 1992
     end_year = 2022
     print("-------------------------------------------------")
     print(f"            Scraping Started                    ")
