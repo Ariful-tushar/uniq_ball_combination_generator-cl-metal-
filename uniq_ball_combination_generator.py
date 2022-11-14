@@ -5,6 +5,7 @@ import csv
 import os
 import sys
 import random
+from collections import Counter
 
 
 def ordinal(n):
@@ -15,10 +16,10 @@ def ordinal(n):
 def save_csv(file_name, data_list, isFirst=False):
     """SAVE DATA INTO CSV FILE"""
     if isFirst:
-        if os.path.isfile(file_name):
+        if os.path.isfile(f'{file_name}'):
             os.remove(file_name)
 
-    with open(f'{file_name}.csv', "a", newline='', encoding='utf-8-sig') as fp:
+    with open(f'{file_name}', "a", newline='', encoding='utf-8-sig') as fp:
         wr = csv.writer(fp, dialect='excel')
         wr.writerow(data_list)
 
@@ -46,9 +47,26 @@ def get_random_number(isPowerball=False):
     """GENERATE A RANDOM BALL NUMBER"""
 
     if isPowerball:
-        return random.randint(1, 26)
+        return f"{random.randint(1, 26)}"
     else:
-        return random.randint(1, 69)
+        return f"{random.randint(1, 69)}"
+
+
+def get_random_set():
+    """GENERATE A RANDOM SET FOR USER"""
+
+    random_ball_list = []
+    while len(random_ball_list) != 5:
+        random_ball = get_random_number()
+        if random_ball not in random_ball_list:
+            random_ball_list.append(random_ball)
+        else:
+            continue
+
+    random_ball_list.append(get_random_number(isPowerball=True))
+    random_ball_list_string = "|".join(random_ball_list)
+
+    return random_ball_list_string
 
 
 def generate_uniq_random_ballset(all_ball_set_strings, generate_set_numbers):
@@ -57,7 +75,8 @@ def generate_uniq_random_ballset(all_ball_set_strings, generate_set_numbers):
     new_sets = []
     for i in range(generate_set_numbers):
         while True:
-            random_ball_string = f"{get_random_number()}|{get_random_number()}|{get_random_number()}|{get_random_number()}|{get_random_number()}|{get_random_number(isPowerball=True)}"
+
+            random_ball_string = get_random_set()
             if random_ball_string not in all_ball_set_strings:
                 all_ball_set_strings.append(random_ball_string)
                 new_sets.append(random_ball_string)
@@ -66,6 +85,17 @@ def generate_uniq_random_ballset(all_ball_set_strings, generate_set_numbers):
                 continue
 
     return [s.split("|") for s in new_sets]
+
+
+def count_sets_for_duplicate(all_ball_set_strings, file_name):
+    """COUNT DUPLICATE SETS AND WRITE TO CSV FILE"""
+
+    count_sets = dict(Counter(all_ball_set_strings))
+    for each_set in count_sets.items():
+        data_list = each_set[0].split("|")
+        data_list.append(each_set[1])
+        # data_list = [each_set[0].split("|"), each_set[1]]
+        save_csv(file_name, data_list)
 
 
 def scraper(file_name, main_url, start_year, end_year, generate_set_numbers):
@@ -84,10 +114,9 @@ def scraper(file_name, main_url, start_year, end_year, generate_set_numbers):
                 ".//ul[1]/li[not(contains(@class , 'power-play'))]/text()")
             ball_numbers = [s.strip() for s in ball_numbers]
             ball_set_string = "|".join(ball_numbers)
-            if ball_set_string not in all_ball_set_strings:
-                all_ball_set_strings.append(ball_set_string)
-                save_csv(file_name, ball_numbers)
+            all_ball_set_strings.append(ball_set_string)
 
+    count_sets_for_duplicate(all_ball_set_strings, file_name)
     newly_generated_sets = generate_uniq_random_ballset(
         all_ball_set_strings, generate_set_numbers)
 
@@ -106,13 +135,13 @@ def main():
         sys.exit()
     main_url = "https://www.lottery.net/powerball/numbers/"
     file_name = "uniq_ball_data.csv"
-    start_year = 1992
+    start_year = 2020
     end_year = 2022
     print("-------------------------------------------------")
     print(f"            Scraping Started                    ")
     print("-------------------------------------------------")
     save_csv(file_name, ['ball_1', 'ball_2', 'ball_3',
-             'ball_4', 'ball_5', 'power_ball'], isFirst=True)
+             'ball_4', 'ball_5', 'power_ball', 'Count'], isFirst=True)
     scraper(file_name, main_url, start_year, end_year, new_sets_to_generate)
 
 
